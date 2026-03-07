@@ -5,9 +5,11 @@ import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { likePost } from "@/services/post.service";
 import { savePost, unsavePost } from "@/services/post.service";
 import CommentsModal from "@/components/comments/CommentsModal";
+import { likePost, unlikePost, getPostLikes } from "@/services/post.service";
+import { useQuery } from "@tanstack/react-query";
+import LikesModal from "@/components/likes/LikesModal";
 
 dayjs.extend(relativeTime);
 
@@ -22,6 +24,7 @@ export default function PostCard({ post }: any) {
   const [saved, setSaved] = useState<boolean>(post.isSaved || false);
 
   const [showComments, setShowComments] = useState(false);
+  const [showLikes, setShowLikes] = useState(false);
 
   const getInitials = (name: string) => {
     return name
@@ -35,8 +38,8 @@ export default function PostCard({ post }: any) {
   const queryClient = useQueryClient();
 
   // Like Mutation
-  const mutation = useMutation({
-    mutationFn: () => likePost(post.id),
+  const likeMutation = useMutation({
+    mutationFn: () => (liked ? unlikePost(post.id) : likePost(post.id)),
 
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -46,18 +49,18 @@ export default function PostCard({ post }: any) {
   });
 
   useEffect(() => {
-    setLiked(post.isLiked || false);
-    setLikes(post.likesCount || 0);
-  }, [post.isLiked, post.likeCount]);
+    setLiked(post.likedByMe || false);
+    setLikes(post.likeCount || 0);
+  }, [post.likedByMe, post.likeCount]);
 
   const handleLike = () => {
-    if (mutation.isPending) return;
+    if (likeMutation.isPending) return;
 
     setLiked((prev) => !prev);
 
     setLikes((prev) => (liked ? prev - 1 : prev + 1));
 
-    mutation.mutate();
+    likeMutation.mutate();
   };
 
   // Save & Unsave Mutation
@@ -113,18 +116,29 @@ export default function PostCard({ post }: any) {
           onDoubleClick={handleLike}
         />
       </div>
+
       {/* Actions */}
       <div className="flex justify-between items-center mt-3">
         {/* Left buttons */}
-        <div className="flex items-center gap-5">
+        <div className="flex items-center gap-6">
           {/* Like */}
-          <button onClick={handleLike} className="flex items-center gap-1">
-            <Heart
-              size={20}
-              className={liked ? "fill-pink-500 text-pink-500" : "text-white"}
-            />
-            <span className="text-sm">{likeCount}</span>
-          </button>
+          {showLikes && (
+            <LikesModal postId={post.id} onClose={() => setShowLikes(false)} />
+          )}
+          <div className="flex justify-center items-center gap-2">
+            <button onClick={handleLike} className="flex items-center gap-1">
+              <Heart
+                size={20}
+                className={liked ? "fill-pink-500 text-pink-500" : "text-white"}
+              />
+            </button>
+            <p
+              onClick={() => setShowLikes(true)}
+              className="text-sm hover:cursor-pointer"
+            >
+              {likes}
+            </p>
+          </div>
 
           {/* Comment */}
           {showComments && (

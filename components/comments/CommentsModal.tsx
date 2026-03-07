@@ -8,8 +8,9 @@ import {
   deleteComment,
 } from "@/services/comment.service";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Smile } from "lucide-react";
 import dayjs from "dayjs";
+import EmojiPicker, { Theme } from "emoji-picker-react";
+import { Smile } from "lucide-react";
 
 export default function CommentsModal({
   postId,
@@ -55,6 +56,11 @@ export default function CommentsModal({
       .slice(0, 2)
       .join("")
       .toUpperCase();
+  };
+
+  const [showEmoji, setShowEmoji] = useState(false);
+  const onEmojiClick = (emojiData: any) => {
+    setText((prev) => prev + emojiData.emoji);
   };
 
   return (
@@ -126,10 +132,23 @@ export default function CommentsModal({
             {/* Emoji Button */}
             <button
               type="button"
+              onClick={() => setShowEmoji(!showEmoji)}
               className="flex items-center justify-center w-12 h-12 rounded-xl border border-neutral-900 text-white p-3"
             >
               <Smile size={18} />
             </button>
+
+            {/* Emoji Picker */}
+            {showEmoji && (
+              <div className="absolute bottom-14 left-0 z-50">
+                <EmojiPicker
+                  onEmojiClick={onEmojiClick}
+                  theme={Theme.DARK}
+                  height={350}
+                  width={300}
+                />
+              </div>
+            )}
 
             {/* Input */}
             <input
