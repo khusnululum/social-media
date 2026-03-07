@@ -15,9 +15,10 @@ export type LoginSchema = z.infer<typeof loginSchema>;
 
 export const registerSchema = z
   .object({
-    email: z.email("Invalid email address"),
+    name: z.string(),
     username: z.string().min(3, "Name must be at least 3 characters"),
-    phoneNumber: z.number(),
+    email: z.email("Invalid email address"),
+    phone: z.string(),
     password: z
       .string()
       .min(6, "Password must be at least 6 characters long")

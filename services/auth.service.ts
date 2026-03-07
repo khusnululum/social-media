@@ -6,9 +6,10 @@ export const loginUser = async (data: { email: string; password: string }) => {
 };
 
 export const registerUser = async (data: {
-  email: string;
+  name: string;
   username: string;
-  phoneNumber: number;
+  email: string;
+  phone: string;
   password: string;
   confirmPassword: string;
 }) => {

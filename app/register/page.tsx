@@ -55,12 +55,17 @@ export default function RegisterPage() {
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="space-y-2">
-            <Label>Email</Label>
+            <Label>Name</Label>
             <Input
-              placeholder="Enter your email"
-              {...form.register("email")}
+              placeholder="Enter your name"
+              {...form.register("name")}
               className="bg-neutral-950 border-neutral-900"
             />
+            {form.formState.errors.name && (
+              <p className="text-red-500 text-sm">
+                {form.formState.errors.name.message}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Username</Label>
@@ -69,14 +74,37 @@ export default function RegisterPage() {
               {...form.register("username")}
               className="bg-neutral-950 border-neutral-900"
             />
+            {form.formState.errors.username && (
+              <p className="text-red-500 text-sm">
+                {form.formState.errors.username.message}
+              </p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label>Email</Label>
+            <Input
+              placeholder="Enter your email"
+              {...form.register("email")}
+              className="bg-neutral-950 border-neutral-900"
+            />
+            {form.formState.errors.email && (
+              <p className="text-red-500 text-sm">
+                {form.formState.errors.email.message}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Phone Number</Label>
             <Input
               placeholder="Enter your phone number"
-              {...form.register("phoneNumber")}
+              {...form.register("phone")}
               className="bg-neutral-950 border-neutral-900"
             />
+            {form.formState.errors.phone && (
+              <p className="text-red-500 text-sm">
+                {form.formState.errors.phone.message}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Password</Label>
@@ -85,6 +113,11 @@ export default function RegisterPage() {
               {...form.register("password")}
               className="bg-neutral-950 border-neutral-900"
             />
+            {form.formState.errors.password && (
+              <p className="text-red-500 text-sm">
+                {form.formState.errors.password.message}
+              </p>
+            )}
           </div>
           <div className="space-y-2">
             <Label>Confirm Password</Label>
@@ -93,6 +126,11 @@ export default function RegisterPage() {
               {...form.register("confirmPassword")}
               className="bg-neutral-950 border-neutral-900"
             />
+            {form.formState.errors.confirmPassword && (
+              <p className="text-red-500 text-sm">
+                {form.formState.errors.confirmPassword.message}
+              </p>
+            )}
           </div>
 
           <Button
@@ -100,7 +138,7 @@ export default function RegisterPage() {
             className="w-full bg-primary-300 rounded-full"
             disabled={mutation.isPending}
           >
-            {mutation.isPending ? "Loading..." : "Login"}
+            {mutation.isPending ? "Loading..." : "Register"}
           </Button>
         </form>
 
