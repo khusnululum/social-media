@@ -7,7 +7,7 @@ export default function BottomNav() {
   const router = useRouter();
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full h-16 px-4">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full h-16 px-4 max-w-md mx-auto">
       <div className="bg-neutral-950 rounded-full flex items-center justify-between px-8 py-3 shadow-lg">
         <button
           onClick={() => router.push("/feed")}

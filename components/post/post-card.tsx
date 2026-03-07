@@ -7,14 +7,21 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { likePost } from "@/services/post.service";
 import { savePost, unsavePost } from "@/services/post.service";
+import CommentsModal from "@/components/comments/CommentsModal";
 
 dayjs.extend(relativeTime);
 
 export default function PostCard({ post }: any) {
-  const [liked, setLiked] = useState<boolean>(post.isLiked || false);
-  const [likes, setLikes] = useState<number>(post.likesCount || 0);
+  const likeCount = post.likeCount ?? 0;
+  const commentCount = post.commentCount ?? 0;
+  const likedByMe = post.likedByMe ?? false;
+
+  const [liked, setLiked] = useState<boolean>(likedByMe);
+  const [likes, setLikes] = useState<number>(likeCount);
 
   const [saved, setSaved] = useState<boolean>(post.isSaved || false);
+
+  const [showComments, setShowComments] = useState(false);
 
   const getInitials = (name: string) => {
     return name
@@ -41,7 +48,7 @@ export default function PostCard({ post }: any) {
   useEffect(() => {
     setLiked(post.isLiked || false);
     setLikes(post.likesCount || 0);
-  }, [post.isLiked, post.likesCount]);
+  }, [post.isLiked, post.likeCount]);
 
   const handleLike = () => {
     if (mutation.isPending) return;
@@ -116,13 +123,22 @@ export default function PostCard({ post }: any) {
               size={20}
               className={liked ? "fill-pink-500 text-pink-500" : "text-white"}
             />
-            <span className="text-sm">{likes}</span>
+            <span className="text-sm">{likeCount}</span>
           </button>
 
           {/* Comment */}
-          <button className="flex items-center gap-1">
+          {showComments && (
+            <CommentsModal
+              postId={post.id}
+              onClose={() => setShowComments(false)}
+            />
+          )}
+          <button
+            onClick={() => setShowComments(true)}
+            className="flex items-center gap-1"
+          >
             <MessageCircle size={20} />
-            <span className="text-sm">{post.commentsCount || 0}</span>
+            <span className="text-sm">{commentCount}</span>
           </button>
 
           {/* Share */}
