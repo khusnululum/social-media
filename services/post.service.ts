@@ -35,3 +35,18 @@ export const unsavePost = async (postId: number) => {
   const res = await api.delete(`/api/posts/${postId}/save`);
   return res.data;
 };
+
+export const createPost = async (data: FormData) => {
+  const res = await api.post("/api/posts", data, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+
+  return res.data;
+};
+
+export const getMyPosts = async () => {
+  const res = await api.get("/api/me/posts");
+  return res.data;
+};
