@@ -92,22 +92,22 @@ export default function ProfilePage() {
       {/* STATS */}
       <div className="grid grid-cols-4 text-center border-l-neutral-100 py-4">
         <div>
-          <p className="font-semibold">{profile?.postsCount}</p>
+          <p className="font-semibold">{stats?.posts ?? 0}</p>
           <p className="text-xs text-gray-400">Posts</p>
         </div>
 
         <div>
-          <p className="font-semibold">{profile?.followersCount}</p>
+          <p className="font-semibold">{stats?.followers ?? 0}</p>
           <p className="text-xs text-gray-400">Followers</p>
         </div>
 
         <div>
-          <p className="font-semibold">{profile?.followingCount}</p>
+          <p className="font-semibold">{stats?.following ?? 0}</p>
           <p className="text-xs text-gray-400">Following</p>
         </div>
 
         <div>
-          <p className="font-semibold">{profile?.likesCount}</p>
+          <p className="font-semibold">{stats?.likes ?? 0}</p>
           <p className="text-xs text-gray-400">Likes</p>
         </div>
       </div>
