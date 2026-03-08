@@ -7,8 +7,7 @@ import relativeTime from "dayjs/plugin/relativeTime";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { savePost, unsavePost } from "@/services/post.service";
 import CommentsModal from "@/components/comments/CommentsModal";
-import { likePost, unlikePost, getPostLikes } from "@/services/post.service";
-import { useQuery } from "@tanstack/react-query";
+import { likePost, unlikePost } from "@/services/post.service";
 import LikesModal from "@/components/likes/LikesModal";
 
 dayjs.extend(relativeTime);
@@ -65,19 +64,28 @@ export default function PostCard({ post }: any) {
 
   // Save & Unsave Mutation
   const saveMutation = useMutation({
-    mutationFn: () => (saved ? unsavePost(post.id) : savePost(post.id)),
+    mutationFn: (isSaved: boolean) =>
+      isSaved ? unsavePost(post.id) : savePost(post.id),
 
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["posts"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["my-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["saved-posts"] });
     },
   });
 
   const handleSave = () => {
-    setSaved((prev) => !prev);
-    saveMutation.mutate();
+    if (saveMutation.isPending) return;
+
+    const current = saved;
+
+    setSaved(!current); // update UI dulu
+    saveMutation.mutate(current); // kirim state lama
   };
+
+  useEffect(() => {
+    setSaved(post.isSaved ?? false);
+  }, [post.isSaved]);
 
   const [expanded, setExpanded] = useState(false);
 

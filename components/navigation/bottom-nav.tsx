@@ -2,33 +2,66 @@
 
 import { Home, Plus, User } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Button } from "../ui/button";
+import { usePathname } from "next/navigation";
 
 export default function BottomNav() {
   const router = useRouter();
+  const pathname = usePathname();
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-full h-16 px-4 max-w-md mx-auto">
-      <div className="bg-neutral-950 rounded-full flex items-center justify-between px-8 py-3 shadow-lg">
-        <button
-          onClick={() => router.push("/feed")}
-          className="flex flex-col justify-center items-center"
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-black border border-neutral-900 rounded-full px-8 py-3 flex justify-between items-center">
+      {/* Home */}
+      <Button
+        onClick={() => router.push("/feed")}
+        className="flex flex-col items-center gap-0"
+      >
+        <Home
+          size={24}
+          className={
+            pathname === "/feed"
+              ? "text-primary-300 size-5"
+              : "text-white size-5"
+          }
+        />
+        <p
+          className={`text-xs ${
+            pathname === "/feed" ? "text-primary-300" : "text-white"
+          }`}
         >
-          <Home className="text-primary-300" />
-          <p className="text-xs text-primary-300">Home</p>
-        </button>
+          Home
+        </p>
+      </Button>
 
-        <button className="bg-primary-300 text-white w-11 h-11 rounded-full flex items-center justify-center">
-          <Plus />
-        </button>
+      {/* Add Post */}
+      <Button
+        onClick={() => router.push("/add-post")}
+        className="bg-primary-300 text-white rounded-full"
+      >
+        <Plus size={24} className="size-5" />
+      </Button>
 
-        <button
-          onClick={() => router.push("/profile")}
-          className="flex flex-col justify-center items-center"
+      {/* Profile */}
+      <Button
+        onClick={() => router.push("/profile")}
+        className="flex flex-col items-center gap-0"
+      >
+        <User
+          size={24}
+          className={
+            pathname === "/profile"
+              ? "text-primary-300 size-5"
+              : "text-white size-5"
+          }
+        />
+        <p
+          className={`text-xs ${
+            pathname === "/profile" ? "text-primary-300" : "text-white"
+          }`}
         >
-          <User className="text-white" />
-          <p className="text-xs text-white">Profile</p>
-        </button>
-      </div>
+          Profile
+        </p>
+      </Button>
     </div>
   );
 }

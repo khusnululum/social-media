@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getMyPosts } from "@/services/post.service";
+import BottomNav from "@/components/navigation/bottom-nav";
+import { useState } from "react";
 
 export default function ProfilePage() {
   const { data, isLoading } = useQuery({
@@ -25,8 +27,9 @@ export default function ProfilePage() {
   const profile = data?.data?.profile;
   const stats = data?.data?.stats;
   const router = useRouter();
-  console.log("postsData:", postsData);
-  console.log("posts:", posts);
+  const [activeTab, setActiveTab] = useState("gallery");
+  const savedPosts = profile?.savedPosts ?? [];
+
   const getInitials = (name?: string) => {
     if (!name) return "";
 
@@ -68,6 +71,7 @@ export default function ProfilePage() {
         <div className="flex flex-row gap-4">
           <Button
             variant="outline"
+            onClick={() => router.push("/edit-profile")}
             className="flex-1 h-10 rounded-full bg-black border-neutral-900"
           >
             Edit Profile
@@ -109,7 +113,11 @@ export default function ProfilePage() {
       </div>
 
       {/* TABS */}
-      <Tabs defaultValue="gallery">
+      <Tabs
+        defaultValue="gallery"
+        value={activeTab}
+        onValueChange={setActiveTab}
+      >
         <TabsList className="grid grid-cols-2 w-full bg-black text-white border-b border-neutral-900 rounded-none">
           <TabsTrigger value="gallery" className="flex gap-2">
             <Grid size={18} />
@@ -117,7 +125,12 @@ export default function ProfilePage() {
           </TabsTrigger>
 
           <TabsTrigger value="saved" className="flex gap-2">
-            <Bookmark size={18} />
+            <Bookmark
+              size={18}
+              className={
+                activeTab === "saved" ? "fill-white text-white" : "text-white"
+              }
+            />
             Saved
           </TabsTrigger>
         </TabsList>
@@ -149,8 +162,27 @@ export default function ProfilePage() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-3 gap-0.5">
+            <div className="grid grid-cols-3 gap-1">
               {posts.map((post: any) => (
+                <img
+                  key={post.id}
+                  src={post.imageUrl}
+                  className="aspect-square object-cover rounded-sm"
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        {/* SAVED */}
+        <TabsContent value="saved">
+          {savedPosts.length === 0 ? (
+            <p className="text-center py-20 text-neutral-400">
+              No saved posts yet
+            </p>
+          ) : (
+            <div className="grid grid-cols-3 gap-0.5">
+              {savedPosts.map((post: any) => (
                 <img
                   key={post.id}
                   src={post.imageUrl}
@@ -160,20 +192,9 @@ export default function ProfilePage() {
             </div>
           )}
         </TabsContent>
-
-        {/* SAVED */}
-        <TabsContent value="saved">
-          <div className="grid grid-cols-3 gap-0.5">
-            {profile?.savedPosts?.map((post: any) => (
-              <img
-                key={post.id}
-                src={post.imageUrl}
-                className="aspect-square object-cover"
-              />
-            ))}
-          </div>
-        </TabsContent>
       </Tabs>
+
+      <BottomNav />
     </div>
   );
 }
