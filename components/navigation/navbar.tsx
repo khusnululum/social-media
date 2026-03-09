@@ -13,6 +13,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import SearchOverlay from "@/components/search/search-overlay";
 
 export default function Navbar({ user }: any) {
   const [open, setOpen] = useState(false);
@@ -25,6 +26,18 @@ export default function Navbar({ user }: any) {
   };
 
   const isLoggedIn = !!user;
+
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [query, setQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!query.trim()) return;
+
+    router.push(`/search?q=${query}`);
+    setSearchOpen(false);
+  };
 
   const getInitials = (name?: string) => {
     if (!name) return "";
@@ -62,7 +75,28 @@ export default function Navbar({ user }: any) {
         {/* Right Side */}
         <div className="flex items-center gap-4">
           {/* Search */}
-          <Search size={20} className="cursor-pointer" />
+          {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} />}
+          {searchOpen ? (
+            <form onSubmit={handleSearch} className="flex items-center gap-2">
+              <input
+                autoFocus
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Search..."
+                className="bg-transparent border border-neutral-800 rounded-full px-3 py-1 text-sm outline-none"
+              />
+
+              <button type="button" onClick={() => setSearchOpen(false)}>
+                <X size={18} />
+              </button>
+            </form>
+          ) : (
+            <Search
+              size={20}
+              className="cursor-pointer"
+              onClick={() => setSearchOpen(true)}
+            />
+          )}
 
           {/* Logged In */}
           {isLoggedIn ? (

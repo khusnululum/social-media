@@ -14,3 +14,8 @@ export const updateProfile = async (formData: FormData) => {
 
   return res.data;
 };
+
+export const searchUsers = async (q: string) => {
+  const res = await api.get(`/api/users/search?q=${q}`);
+  return res.data;
+};

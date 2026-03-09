@@ -43,7 +43,7 @@ export default function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="p-4 space-y-4">
+      <div className="p-4 space-y-4 bg-black min-h-screen">
         <Skeleton className="h-16 w-16 rounded-full" />
         <Skeleton className="h-6 w-40" />
         <Skeleton className="h-4 w-60" />
