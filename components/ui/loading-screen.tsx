@@ -26,7 +26,7 @@ export default function LoadingScreen() {
           {[0, 1, 2].map((i) => (
             <motion.div
               key={i}
-              className="w-3 h-3 bg-purple-500 rounded-full"
+              className="w-3 h-3 bg-primary-300 rounded-full"
               animate={{ opacity: [0.3, 1, 0.3] }}
               transition={{
                 duration: 1.2,

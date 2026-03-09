@@ -1,15 +1,5 @@
-import LoginPage from "./login/page";
-import RegisterPage from "./register/page";
+import { redirect } from "next/navigation";
 
 export default function Home() {
-  return (
-    <main>
-      <section id="login">
-        <LoginPage />
-      </section>
-      <section id="register">
-        <RegisterPage />
-      </section>
-    </main>
-  );
+  redirect("/login");
 }
