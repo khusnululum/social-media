@@ -5,9 +5,10 @@ import { getPosts } from "@/services/post.service";
 import PostCard from "@/components/post/post-card";
 import BottomNav from "@/components/navigation/bottom-nav";
 import { useEffect } from "react";
+import LoadingScreen from "@/components/ui/loading-screen";
 
 export default function FeedPage() {
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["posts"],
       queryFn: getPosts,
@@ -35,6 +36,10 @@ export default function FeedPage() {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [fetchNextPage, hasNextPage]);
+
+  if (isLoading) {
+    return <LoadingScreen />;
+  }
 
   return (
     <>
