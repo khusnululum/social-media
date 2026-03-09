@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, MessageCircle, Send, Bookmark } from "lucide-react";
+import { Heart, MessageCircle, Send, Bookmark, icons } from "lucide-react";
 import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -9,6 +9,8 @@ import { savePost, unsavePost } from "@/services/post.service";
 import CommentsModal from "@/components/comments/CommentsModal";
 import { likePost, unlikePost } from "@/services/post.service";
 import LikesModal from "@/components/likes/LikesModal";
+import { useRouter } from "next/navigation";
+import { Button } from "../ui/button";
 
 dayjs.extend(relativeTime);
 
@@ -24,6 +26,7 @@ export default function PostCard({ post }: any) {
 
   const [showComments, setShowComments] = useState(false);
   const [showLikes, setShowLikes] = useState(false);
+  const router = useRouter();
 
   const getInitials = (name: string) => {
     return name
@@ -120,8 +123,8 @@ export default function PostCard({ post }: any) {
       <div className="aspect-square w-full overflow-hidden rounded-xl">
         <img
           src={post.imageUrl}
-          className="w-full h-full object-cover"
-          onDoubleClick={handleLike}
+          className="w-full h-full object-cover cursor-pointer"
+          onClick={() => router.push(`/post/${post.id}`)}
         />
       </div>
 
@@ -133,13 +136,13 @@ export default function PostCard({ post }: any) {
           {showLikes && (
             <LikesModal postId={post.id} onClose={() => setShowLikes(false)} />
           )}
-          <div className="flex justify-center items-center gap-2">
-            <button onClick={handleLike} className="flex items-center gap-1">
+          <div className="flex justify-center items-center">
+            <Button onClick={handleLike} className="flex items-center">
               <Heart
                 size={20}
                 className={liked ? "fill-pink-500 text-pink-500" : "text-white"}
               />
-            </button>
+            </Button>
             <p
               onClick={() => setShowLikes(true)}
               className="text-sm hover:cursor-pointer"
@@ -155,28 +158,28 @@ export default function PostCard({ post }: any) {
               onClose={() => setShowComments(false)}
             />
           )}
-          <button
+          <Button
             onClick={() => setShowComments(true)}
             className="flex items-center gap-1"
           >
             <MessageCircle size={20} />
             <span className="text-sm">{commentCount}</span>
-          </button>
+          </Button>
 
           {/* Share */}
-          <button className="flex items-center gap-1">
+          <Button className="flex items-center gap-1">
             <Send size={20} />
             <span className="text-sm">{post.sharesCount || 0}</span>
-          </button>
+          </Button>
         </div>
 
         {/* Save */}
-        <button onClick={handleSave}>
+        <Button onClick={handleSave}>
           <Bookmark
             size={20}
             className={saved ? "fill-white text-white" : "text-white"}
           />
-        </button>
+        </Button>
       </div>
 
       {/* Caption */}

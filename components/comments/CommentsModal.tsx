@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { X } from "lucide-react";
 import {
   getComments,
@@ -11,6 +11,8 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import dayjs from "dayjs";
 import EmojiPicker, { Theme } from "emoji-picker-react";
 import { Smile } from "lucide-react";
+import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 export default function CommentsModal({
   postId,
@@ -47,6 +49,7 @@ export default function CommentsModal({
     },
   });
 
+  const post = data?.data?.post;
   const comments = data?.data?.comments ?? [];
 
   const getInitials = (name: string) => {
@@ -63,6 +66,25 @@ export default function CommentsModal({
     setText((prev) => prev + emojiData.emoji);
   };
 
+  const emojiRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        emojiRef.current &&
+        !emojiRef.current.contains(event.target as Node)
+      ) {
+        setShowEmoji(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
   return (
     <div className="fixed inset-0 z-50 max-w-md mx-auto">
       {/* Overlay */}
@@ -74,9 +96,9 @@ export default function CommentsModal({
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-white font-bold">Comments</h2>
 
-          <button onClick={onClose}>
+          <Button onClick={onClose}>
             <X size={20} className="text-white" />
-          </button>
+          </Button>
         </div>
 
         {/* Comments List */}
@@ -112,14 +134,7 @@ export default function CommentsModal({
                       </p>
                     </div>
                   </div>
-                  <p className="text-white text-xs">{comment.text}</p>
-
-                  {/* <button
-                    onClick={() => deleteMutation.mutate(comment.id)}
-                    className="text-red-400 text-xs"
-                  >
-                    delete
-                  </button> */}
+                  <p className="text-white text-xs">{comment.content}</p>
                 </div>
               ))}
             </div>
@@ -130,17 +145,17 @@ export default function CommentsModal({
         <div className="relative mt-4 pt-3">
           <div className="relative flex gap-4">
             {/* Emoji Button */}
-            <button
+            <Button
               type="button"
               onClick={() => setShowEmoji(!showEmoji)}
               className="flex items-center justify-center w-12 h-12 rounded-xl border border-neutral-900 text-white p-3"
             >
               <Smile size={18} />
-            </button>
+            </Button>
 
             {/* Emoji Picker */}
             {showEmoji && (
-              <div className="absolute bottom-14 left-0 z-50">
+              <div ref={emojiRef} className="absolute bottom-14 left-0 z-50">
                 <EmojiPicker
                   onEmojiClick={onEmojiClick}
                   theme={Theme.DARK}
@@ -151,7 +166,7 @@ export default function CommentsModal({
             )}
 
             {/* Input */}
-            <input
+            <Input
               value={text}
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => {
@@ -164,7 +179,7 @@ export default function CommentsModal({
             />
 
             {/* Post Button */}
-            <button
+            <Button
               onClick={() =>
                 addMutation.mutate({
                   postId,
@@ -172,10 +187,10 @@ export default function CommentsModal({
                 })
               }
               disabled={!text.trim()}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-primary-200 text-sm font-bold disabled:text-neutral-600"
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-primary-200 text-sm font-bold disabled:text-neutral-600"
             >
               Post
-            </button>
+            </Button>
           </div>
         </div>
       </div>

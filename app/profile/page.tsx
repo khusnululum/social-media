@@ -82,7 +82,7 @@ export default function ProfilePage() {
             size="icon"
             className="bg-black h-10 border-neutral-900 rounded-full"
           >
-            <Send size={20} />
+            <Send size={20} className="size-5" />
           </Button>
         </div>
 
@@ -167,6 +167,7 @@ export default function ProfilePage() {
                 <img
                   key={post.id}
                   src={post.imageUrl}
+                  onClick={() => router.push(`/post/${post.id}`)}
                   className="aspect-square object-cover rounded-sm"
                 />
               ))}

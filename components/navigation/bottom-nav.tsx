@@ -15,7 +15,7 @@ export default function BottomNav() {
   ];
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-neutral-950 border border-neutral-900 rounded-full px-6 py-2 flex justify-between items-center">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-neutral-950 border border-neutral-900 rounded-full px-8 py-1 flex justify-between items-center">
       {/* Tabs */}
       <div className="flex flex-1 justify-between items-center">
         {tabs.map((tab) => {
@@ -67,7 +67,7 @@ export default function BottomNav() {
         onClick={() => router.push("/add-post")}
         className="absolute left-1/2 -translate-x-1/2 bg-primary-300 text-white rounded-full flex items-center justify-center shadow-lg"
       >
-        <Plus size={24} className="size-5" />
+        <Plus size={24} className="size-6 mx-1" />
       </Button>
     </div>
   );

@@ -67,10 +67,13 @@ export default function Navbar({ user }: any) {
       {/* TOP BAR */}
       <div className="flex items-center justify-between">
         {/* Logo */}
-        <div className="flex items-center gap-3 font-semibold text-lg">
+        <Button
+          onClick={() => router.push("/feed")}
+          className="flex items-center gap-3 font-semibold text-lg p-0"
+        >
           <Image alt="Logo" src={Logo} width={24} height={24} />
           Sociality
-        </div>
+        </Button>
 
         {/* Right Side */}
         <div className="flex items-center gap-4">

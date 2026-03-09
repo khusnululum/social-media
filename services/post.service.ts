@@ -50,3 +50,8 @@ export const getMyPosts = async () => {
   const res = await api.get("/api/me/posts");
   return res.data;
 };
+
+export const getPostDetail = async (id: number) => {
+  const res = await api.get(`/api/posts/${id}`);
+  return res.data;
+};
