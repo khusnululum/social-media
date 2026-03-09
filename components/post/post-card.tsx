@@ -105,7 +105,11 @@ export default function PostCard({ post }: any) {
       {/* Header */}
       <div className="flex items-center gap-3 mb-3">
         {post.author.avatarUrl ? (
-          <img src={post.author.avatarUrl} className="w-10 h-10 rounded-full" />
+          <img
+            onClick={() => router.push(`/profile/${post.author.username}`)}
+            src={post.author.avatarUrl}
+            className="w-10 h-10 rounded-full"
+          />
         ) : (
           <div className="w-10 h-10 rounded-full border border-neutral-800 flex items-center justify-center font-semibold">
             {getInitials(post.author.name)}
@@ -113,7 +117,12 @@ export default function PostCard({ post }: any) {
         )}
 
         <div>
-          <p className="font-semibold">{post.author.name}</p>
+          <p
+            onClick={() => router.push(`/profile/${post.author.username}`)}
+            className="font-semibold"
+          >
+            {post.author.name}
+          </p>
           <p className="text-xs text-gray-400">
             {dayjs(post.createdAt).fromNow()}
           </p>
@@ -184,7 +193,12 @@ export default function PostCard({ post }: any) {
 
       {/* Caption */}
       <div>
-        <p className="font-semibold mt-2">{post.author.username}</p>
+        <p
+          onClick={() => router.push(`/profile/${post.author.username}`)}
+          className="font-semibold mt-2"
+        >
+          {post.author.username}
+        </p>
         <p className="mt-2 text-sm">
           {displayedCaption}
 

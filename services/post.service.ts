@@ -55,3 +55,8 @@ export const getPostDetail = async (id: number) => {
   const res = await api.get(`/api/posts/${id}`);
   return res.data;
 };
+
+export const getUserPosts = async (username: string) => {
+  const res = await api.get(`/api/users/${username}/posts`);
+  return res.data;
+};
