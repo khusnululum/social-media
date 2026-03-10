@@ -15,7 +15,7 @@ export default function BottomNav() {
   ];
 
   return (
-    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-md bg-neutral-950 border border-neutral-900 rounded-full px-8 py-1 flex justify-between items-center">
+    <div className="fixed bottom-4 left-1/2 -translate-x-1/2 w-[90%] max-w-md md:w-70 bg-neutral-950 border border-neutral-900 rounded-full px-8 py-1 flex justify-between items-center">
       {/* Tabs */}
       <div className="flex flex-1 justify-between items-center">
         {tabs.map((tab) => {

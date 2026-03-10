@@ -42,8 +42,8 @@ export default function FeedPage() {
   }
 
   return (
-    <>
-      <div className="max-w-md mx-auto pb-28 bg-black">
+    <div className="bg-black">
+      <div className="max-w-150 mx-auto pb-28 bg-black">
         {data?.pages.map((page, i) => (
           <div key={i}>
             {(page.data?.posts ?? []).map((post: any) => (
@@ -58,6 +58,6 @@ export default function FeedPage() {
       </div>
 
       <BottomNav />
-    </>
+    </div>
   );
 }

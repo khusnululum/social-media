@@ -86,7 +86,7 @@ export default function CommentsModal({
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 max-w-md mx-auto">
+    <div className="fixed inset-0 z-50 max-w-150 mx-auto">
       {/* Overlay */}
       <div className="absolute inset-0 bg-black/70" onClick={onClose} />
 
@@ -117,7 +117,7 @@ export default function CommentsModal({
                     {comment.author.avatarUrl ? (
                       <img
                         src={comment.author.avatarUrl}
-                        className="w-10 h-10 rounded-full"
+                        className="w-10 h-10 object-cover rounded-full"
                       />
                     ) : (
                       <div className="w-8 h-8 rounded-full border border-neutral-800 flex items-center justify-center font-semibold">
@@ -126,7 +126,7 @@ export default function CommentsModal({
                     )}
 
                     <div className="flex-1 text-white">
-                      <p className="font-semibold text-xs">
+                      <p className="font-bold text-sm">
                         {comment.author.username}
                       </p>
                       <p className="text-xs text-neutral-400">
@@ -134,7 +134,7 @@ export default function CommentsModal({
                       </p>
                     </div>
                   </div>
-                  <p className="text-white text-xs">{comment.content}</p>
+                  <p className="text-white text-sm">{comment.text}</p>
                 </div>
               ))}
             </div>

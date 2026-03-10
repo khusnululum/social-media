@@ -3,6 +3,9 @@
 import { X } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { getPostLikes } from "@/services/post.service";
+import { Button } from "../ui/button";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { followUser, unfollowUser } from "@/services/user.service";
 
 export default function LikesModal({
   postId,
@@ -27,20 +30,36 @@ export default function LikesModal({
       .toUpperCase();
   };
 
+  const queryClient = useQueryClient();
+
+  const followMutation = useMutation({
+    mutationFn: ({ username, isFollowing }: any) =>
+      isFollowing ? unfollowUser(username) : followUser(username),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["postLikes", postId],
+      });
+    },
+  });
+
   return (
-    <div className="fixed inset-0 z-50">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center">
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/70" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+        onClick={onClose}
+      />
 
       {/* Bottom Sheet */}
-      <div className="absolute bottom-0 left-0 right-0 bg-black rounded-t-2xl p-5 max-h-[70vh] flex flex-col">
+      <div className="relative w-full md:w-140 bg-neutral-950 rounded-t-2xl md:rounded-2xl p-6 max-h-[70vh] flex flex-col shadow-2xl">
         {/* Header */}
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-white font-semibold text-lg">Likes</h2>
 
-          <button onClick={onClose}>
+          <Button onClick={onClose}>
             <X size={20} className="text-white" />
-          </button>
+          </Button>
         </div>
 
         {/* List */}
@@ -72,14 +91,22 @@ export default function LikesModal({
               </div>
 
               {/* Follow Button */}
-              {user.isMe ? null : user.isFollowedByMe ? (
-                <button className="px-4 py-1 rounded-full border border-neutral-700 text-white text-sm">
-                  Following
-                </button>
-              ) : (
-                <button className="px-4 py-1 rounded-full bg-primary-300 text-white text-sm">
-                  Follow
-                </button>
+              {user.isMe ? null : (
+                <Button
+                  onClick={() =>
+                    followMutation.mutate({
+                      username: user.username,
+                      isFollowing: user.isFollowedByMe,
+                    })
+                  }
+                  className={`px-4 py-1 rounded-full text-sm ${
+                    user.isFollowedByMe
+                      ? "border border-neutral-700 bg-transparent text-white"
+                      : "bg-primary-300 text-white"
+                  }`}
+                >
+                  {user.isFollowedByMe ? "Following" : "Follow"}
+                </Button>
               )}
             </div>
           ))}

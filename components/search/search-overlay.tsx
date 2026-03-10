@@ -5,9 +5,28 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { searchUsers } from "@/services/user.service";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
+import { useRouter } from "next/navigation";
+import { createPortal } from "react-dom";
+import { usePathname } from "next/navigation";
+import { useEffect } from "react";
+import { useRef } from "react";
 
 export default function SearchOverlay({ onClose }: any) {
   const [query, setQuery] = useState("");
+  const router = useRouter();
+  const [results, setResults] = useState<any[]>([]);
+  const pathname = usePathname();
+
+  const prevPath = useRef(pathname);
+
+  useEffect(() => {
+    if (prevPath.current !== pathname) {
+      onClose();
+    }
+    prevPath.current = pathname;
+  }, [pathname]);
 
   const { data, isLoading } = useQuery({
     queryKey: ["search-users", query],
@@ -27,30 +46,27 @@ export default function SearchOverlay({ onClose }: any) {
       .toUpperCase();
   };
 
-  return (
-    <div className="fixed inset-0 bg-black z-100 px-4 pt-4 text-white">
+  return createPortal(
+    <div className="fixed inset-0 bg-black z-50 px-4 pt-4 text-white">
       {/* Search Bar */}
       <div className="flex items-center gap-3">
-        <div className="flex items-center flex-1 bg-neutral-900 rounded-full px-4 py-2">
-          <Search size={18} className="text-gray-400" />
-
-          <input
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search users..."
-            className="bg-transparent outline-none ml-2 flex-1 text-sm"
+        <div className="relative flex items-center flex-1">
+          <Search
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400"
           />
 
-          {query && (
-            <button onClick={() => setQuery("")}>
-              <X size={16} className="text-gray-400" />
-            </button>
-          )}
+          <Input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Search"
+            className="w-full rounded-full bg-neutral-900 border border-neutral-800 outline-none pl-10 flex-1 text-sm"
+          />
         </div>
 
-        <button onClick={onClose}>
+        <Button onClick={onClose}>
           <X size={22} />
-        </button>
+        </Button>
       </div>
 
       {/* Results */}
@@ -68,7 +84,15 @@ export default function SearchOverlay({ onClose }: any) {
 
         {!isLoading &&
           users.map((user: any) => (
-            <div key={user.id} className="flex items-center gap-3">
+            <div
+              key={user.id}
+              onClick={() => {
+                router.push(`/profile/${user.username}`);
+                setQuery("");
+                setResults([]);
+              }}
+              className="flex items-center gap-3"
+            >
               <Avatar className="w-12 h-12">
                 <AvatarImage src={user.avatarUrl} />
                 <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
@@ -81,6 +105,7 @@ export default function SearchOverlay({ onClose }: any) {
             </div>
           ))}
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

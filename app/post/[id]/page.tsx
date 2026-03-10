@@ -87,11 +87,13 @@ export default function PostDetailPage({
 
   if (isLoading) {
     return (
-      <div className="p-4 space-y-4 bg-black min-h-screen">
-        <Skeleton className="h-40 w-full" />
-        <Skeleton className="h-16 w-16 rounded-full" />
-        <Skeleton className="h-6 w-40" />
-        <Skeleton className="h-4 w-60" />
+      <div className="bg-black max-w-360 mx-auto">
+        <div className="p-4 space-y-4 bg-black min-h-screen max-w-150 mx-auto">
+          <Skeleton className="h-40 w-full" />
+          <Skeleton className="h-16 w-16 rounded-full" />
+          <Skeleton className="h-6 w-40" />
+          <Skeleton className="h-4 w-60" />
+        </div>
       </div>
     );
   }
@@ -108,147 +110,154 @@ export default function PostDetailPage({
   console.log(data);
 
   return (
-    <div className="bg-black text-white min-h-screen max-w-md mx-auto">
-      {/* IMAGE */}
-      <div className="w-full">
-        <img src={post.imageUrl} className="w-full p-4" />
-      </div>
-
-      <div className="m-4 p-4 bg-neutral-950 space-y-4 min-h-screen rounded-2xl">
-        {/* AUTHOR */}
-        <div className="flex items-center gap-3">
-          <Avatar>
-            <AvatarImage src={post.author.avatarUrl} />
-            <AvatarFallback>{getInitials(post.author.name)}</AvatarFallback>
-          </Avatar>
-
-          <div>
-            <p className="font-semibold">{post.author.username}</p>
-            <p className="text-xs text-neutral-400">
-              {dayjs(post.createdAt).fromNow()}
-            </p>
-          </div>
+    <div className="bg-black max-w-360 mx-auto md:flex md:items-center md:justify-center">
+      <div className="bg-black text-white min-h-screen max-w-6xl mx-auto md:flex md:gap-6 px-4">
+        {/* IMAGE */}
+        <div className="md:w-2/3 flex items-center justify-center">
+          <img src={post.imageUrl} className="w-full object-cover rounded-xl" />
         </div>
 
-        {/* CAPTION */}
-        <p className="text-sm">
-          <span className="font-semibold mr-2">{post.author.username}</span>
-          {post.caption}
-        </p>
+        <div className="md:w-1/3 md:my-auto flex flex-col h-[calc(100vh-120px)] bg-neutral-950 p-4 rounded-2xl md:h-[85vh]">
+          {/* AUTHOR */}
+          <div className="flex items-center gap-3">
+            <Avatar>
+              <AvatarImage src={post.author.avatarUrl} />
+              <AvatarFallback>{getInitials(post.author.name)}</AvatarFallback>
+            </Avatar>
 
-        {/* Comments List */}
-        <div className="flex-1 overflow-y-auto border-t border-neutral-900">
-          {commentsLoading ? (
-            <p className="text-center text-gray-400 mt-4">
-              Loading comments...
-            </p>
-          ) : comments.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 mt-4">
-              <p className="text-white font-semibold">No Comments yet</p>
-              <p className="text-sm text-gray-500">Start the conversation</p>
+            <div>
+              <p className="font-semibold">{post.author.username}</p>
+              <p className="text-xs text-neutral-400">
+                {dayjs(post.createdAt).fromNow()}
+              </p>
             </div>
-          ) : (
-            <div className="space-y-4">
-              {comments.map((comment: any) => (
-                <div key={comment.id} className="space-y-2">
-                  <div className="flex gap-3">
-                    <Avatar className="w-8 h-8">
-                      <AvatarImage src={comment.author?.avatarUrl} />
-                      <AvatarFallback>
-                        {getInitials(comment.author?.name)}
-                      </AvatarFallback>
-                    </Avatar>
+          </div>
 
-                    <div>
-                      <p className="font-semibold text-xs">
-                        {comment.author?.username}
-                      </p>
-                      <p className="text-xs text-neutral-400">
-                        {dayjs(comment.createdAt).fromNow()}
-                      </p>
+          {/* CAPTION */}
+          <p className="text-sm py-4 mt-4 border-t border-neutral-900">
+            <span className="font-semibold mr-2">{post.author.username}</span>
+            {post.caption}
+          </p>
+
+          {/* Comments List */}
+          <div className="flex-1 overflow-y-auto border-t border-neutral-900 py-4">
+            {commentsLoading ? (
+              <p className="text-center text-gray-400 mt-4">
+                Loading comments...
+              </p>
+            ) : comments.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-full text-center text-gray-400 mt-4">
+                <p className="text-white font-semibold">No Comments yet</p>
+                <p className="text-sm text-neutral-500">
+                  Start the conversation
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {comments.map((comment: any) => (
+                  <div key={comment.id} className="space-y-2">
+                    <div className="flex gap-3">
+                      <Avatar className="w-10 h-10">
+                        <AvatarImage
+                          src={comment.author?.avatarUrl}
+                          className="w-10 h-10 object-cover"
+                        />
+                        <AvatarFallback>
+                          {getInitials(comment.author?.name)}
+                        </AvatarFallback>
+                      </Avatar>
+
+                      <div>
+                        <p className="font-bold text-sm">
+                          {comment.author?.username}
+                        </p>
+                        <p className="text-xs text-neutral-400">
+                          {dayjs(comment.createdAt).fromNow()}
+                        </p>
+                      </div>
                     </div>
+
+                    <p className="text-white text-sm">{comment.text}</p>
                   </div>
+                ))}
+              </div>
+            )}
+          </div>
 
-                  <p className="text-white text-xs">{comment.content}</p>
-                </div>
-              ))}
+          {/* ACTIONS */}
+          <div className="flex items-center justify-between m-0 pt-2 border-t border-neutral-900">
+            <div className="flex">
+              <Button className="flex items-center gap-2">
+                <Heart size={20} className="size-5" />
+                <span>{post.likeCount}</span>
+              </Button>
+
+              <Button className="flex items-center gap-2">
+                <MessageCircle size={20} className="size-5" />
+                <span>{post.commentCount}</span>
+              </Button>
             </div>
-          )}
-        </div>
 
-        {/* ACTIONS */}
-        <div className="flex items-center justify-between m-0 pt-2 border-t border-neutral-900">
-          <div className="flex">
-            <Button className="flex items-center gap-2">
-              <Heart size={20} className="size-5" />
-              <span>{post.likeCount}</span>
-            </Button>
-
-            <Button className="flex items-center gap-2">
-              <MessageCircle size={20} className="size-5" />
-              <span>{post.commentCount}</span>
+            <Button className="flex">
+              <Bookmark size={20} className="size-5" />
+              <Share size={20} className="size-5" />
             </Button>
           </div>
 
-          <Button className="flex">
-            <Bookmark size={20} className="size-5" />
-            <Share size={20} className="size-5" />
-          </Button>
-        </div>
+          {/* COMMENTS */}
+          <div className="relative flex flex-row bg-neutral-950 gap-2 bottom-0">
+            {/* Input */}
+            <Input
+              value={text}
+              onChange={(e) => setText(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && text.trim()) {
+                  addMutation.mutate({
+                    postId: id,
+                    text,
+                  });
+                }
+              }}
+              placeholder="Add Comment"
+              className="flex-1 bg-neutral-900 text-white rounded-xl text-sm border border-neutral-900"
+            />
 
-        {/* COMMENTS */}
-        <div className="relative flex flex-row bg-neutral-950 gap-2">
-          {/* Input */}
-          <Input
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && text.trim()) {
+            {/* Emoji Button */}
+            <Button
+              type="button"
+              onClick={() => setShowEmoji(!showEmoji)}
+              className="absolute right-18 top-0.5 text-white"
+            >
+              <Smile
+                size={20}
+                className={showEmoji ? "text-primary-300" : "text-white"}
+              />
+            </Button>
+            {/* Emoji Picker */}
+            {showEmoji && (
+              <div ref={emojiRef} className="absolute bottom-14 left-0 z-50">
+                <EmojiPicker
+                  onEmojiClick={onEmojiClick}
+                  theme={Theme.DARK}
+                  height={350}
+                  width={300}
+                />
+              </div>
+            )}
+
+            {/* Post Button */}
+            <Button
+              onClick={() =>
                 addMutation.mutate({
                   postId: id,
                   text,
-                });
+                })
               }
-            }}
-            placeholder="Add Comment"
-            className="flex-1 bg-neutral-900 text-white rounded-xl text-sm border border-neutral-900"
-          />
-
-          {/* Emoji Button */}
-          <Button
-            type="button"
-            onClick={() => setShowEmoji(!showEmoji)}
-            className="absolute right-18 top-0.5 text-white"
-          >
-            <Smile
-              size={20}
-              className={showEmoji ? "text-primary-300" : "text-white"}
-            />
-          </Button>
-          {/* Emoji Picker */}
-          {showEmoji && (
-            <div ref={emojiRef} className="absolute bottom-14 left-0 z-50">
-              <EmojiPicker
-                onEmojiClick={onEmojiClick}
-                theme={Theme.DARK}
-                height={350}
-                width={300}
-              />
-            </div>
-          )}
-
-          {/* Post Button */}
-          <Button
-            onClick={() =>
-              addMutation.mutate({
-                postId: id,
-                text,
-              })
-            }
-            disabled={!text.trim()}
-          >
-            Post
-          </Button>
+              disabled={!text.trim()}
+            >
+              Post
+            </Button>
+          </div>
         </div>
       </div>
     </div>
