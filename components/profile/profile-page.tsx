@@ -241,12 +241,15 @@ export default function ProfilePageComponent({
           onValueChange={setActiveTab}
         >
           <TabsList className="grid grid-cols-2 w-full bg-black text-white border-b border-neutral-900 rounded-none">
-            <TabsTrigger value="gallery" className="flex gap-2">
+            <TabsTrigger
+              value="gallery"
+              className="flex gap-2 hover:text-white"
+            >
               <Grid size={18} />
               Gallery
             </TabsTrigger>
 
-            <TabsTrigger value="saved" className="flex gap-2">
+            <TabsTrigger value="saved" className="flex gap-2 hover:text-white">
               {isMyProfile ? (
                 <Bookmark
                   size={18}

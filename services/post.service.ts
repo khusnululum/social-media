@@ -60,3 +60,17 @@ export const getUserPosts = async (username: string) => {
   const res = await api.get(`/api/users/${username}/posts`);
   return res.data;
 };
+
+export const deletePost = async (id: number) => {
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/posts/${id}`,
+    {
+      method: "DELETE",
+      headers: {
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
+    },
+  );
+
+  return res.json();
+};

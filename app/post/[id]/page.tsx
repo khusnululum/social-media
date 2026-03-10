@@ -18,6 +18,16 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+  likePost,
+  unlikePost,
+  savePost,
+  unsavePost,
+  deletePost,
+} from "@/services/post.service";
+import { Trash2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { getMe } from "@/services/user.service";
 
 dayjs.extend(relativeTime);
 
@@ -30,17 +40,85 @@ export default function PostDetailPage({
 }) {
   const params = useParams();
   const id = Number(params.id);
+  const router = useRouter();
 
   const { data, isLoading } = useQuery({
     queryKey: ["post-detail", id],
     queryFn: () => getPostDetail(Number(id)),
   });
 
+  const { data: meData } = useQuery({
+    queryKey: ["me"],
+    queryFn: getMe,
+  });
+
+  const currentUser = meData?.data?.user;
+
   const post = data?.data;
   const [text, setText] = useState("");
   const [showEmoji, setShowEmoji] = useState(false);
   const onEmojiClick = (emojiData: any) => {
     setText((prev) => prev + emojiData.emoji);
+  };
+
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
+  const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (!post) return;
+
+    setLiked(post.likedByMe ?? false);
+    setLikeCount(post.likeCount ?? 0);
+    setSaved(post.isSaved ?? false);
+  }, [post]);
+
+  const likeMutation = useMutation({
+    mutationFn: () => (liked ? unlikePost(post.id) : likePost(post.id)),
+
+    onMutate: async () => {
+      await queryClient.cancelQueries({
+        queryKey: ["post-detail", id],
+      });
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["post-detail", id],
+      });
+    },
+  });
+
+  const saveMutation = useMutation({
+    mutationFn: (isSaved: boolean) =>
+      isSaved ? unsavePost(post.id) : savePost(post.id),
+
+    onSettled: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["post-detail", id],
+      });
+    },
+  });
+
+  const handleLike = () => {
+    if (likeMutation.isPending) return;
+
+    const newLiked = !liked;
+
+    setLiked(newLiked);
+    setLikeCount((prev) => (newLiked ? prev + 1 : prev - 1));
+
+    likeMutation.mutate();
+  };
+
+  const handleSave = () => {
+    if (saveMutation.isPending) return;
+
+    const current = saved;
+
+    setSaved(!current);
+
+    saveMutation.mutate(current);
   };
 
   const queryClient = useQueryClient();
@@ -65,6 +143,26 @@ export default function PostDetailPage({
       });
     },
   });
+
+  const handleDelete = () => {
+    if (!confirm("Delete this post?")) return;
+
+    deleteMutation.mutate();
+  };
+
+  const deleteMutation = useMutation({
+    mutationFn: () => deletePost(post.id),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["my-posts"] });
+
+      router.push("/feed");
+    },
+  });
+
+  const isMyPost =
+    currentUser && post ? currentUser.id === post.author.id : false;
 
   const emojiRef = useRef<HTMLDivElement | null>(null);
 
@@ -107,7 +205,9 @@ export default function PostDetailPage({
       .join("")
       .toUpperCase();
   };
-  console.log(data);
+  console.log("ME:", currentUser);
+  console.log("POST AUTHOR:", post?.author?.id);
+  console.log("IS MY POST:", isMyPost);
 
   return (
     <div className="bg-black max-w-360 mx-auto md:flex md:items-center md:justify-center">
@@ -120,7 +220,7 @@ export default function PostDetailPage({
         <div className="md:w-1/3 md:my-auto flex flex-col h-[calc(100vh-120px)] bg-neutral-950 p-4 rounded-2xl md:h-[85vh]">
           {/* AUTHOR */}
           <div className="flex items-center gap-3">
-            <Avatar>
+            <Avatar className="w-10 h-10 object-cover">
               <AvatarImage src={post.author.avatarUrl} />
               <AvatarFallback>{getInitials(post.author.name)}</AvatarFallback>
             </Avatar>
@@ -131,6 +231,18 @@ export default function PostDetailPage({
                 {dayjs(post.createdAt).fromNow()}
               </p>
             </div>
+
+            {/* DELETE BUTTON */}
+
+            {isMyPost && (
+              <Button
+                onClick={handleDelete}
+                variant="ghost"
+                className="text-red-500 hover:text-red-600"
+              >
+                <Trash2 size={18} />
+              </Button>
+            )}
           </div>
 
           {/* CAPTION */}
@@ -185,22 +297,32 @@ export default function PostDetailPage({
           </div>
 
           {/* ACTIONS */}
-          <div className="flex items-center justify-between m-0 pt-2 border-t border-neutral-900">
-            <div className="flex">
-              <Button className="flex items-center gap-2">
-                <Heart size={20} className="size-5" />
-                <span>{post.likeCount}</span>
+          <div className="flex items-center justify-between pt-2 border-t border-neutral-900">
+            <div className="flex gap-4">
+              {/* LIKE */}
+              <Button onClick={handleLike} className="flex items-center gap-2">
+                <Heart
+                  size={20}
+                  className={
+                    liked ? "fill-pink-500 text-pink-500" : "text-white"
+                  }
+                />
+                <span>{likeCount}</span>
               </Button>
 
+              {/* COMMENT */}
               <Button className="flex items-center gap-2">
-                <MessageCircle size={20} className="size-5" />
-                <span>{post.commentCount}</span>
+                <MessageCircle size={20} />
+                <span>{comments.length}</span>
               </Button>
             </div>
 
-            <Button className="flex">
-              <Bookmark size={20} className="size-5" />
-              <Share size={20} className="size-5" />
+            {/* SAVE */}
+            <Button onClick={handleSave}>
+              <Bookmark
+                size={20}
+                className={saved ? "fill-white text-white" : "text-white"}
+              />
             </Button>
           </div>
 

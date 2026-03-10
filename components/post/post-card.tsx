@@ -43,7 +43,19 @@ export default function PostCard({ post }: any) {
   const likeMutation = useMutation({
     mutationFn: () => (liked ? unlikePost(post.id) : likePost(post.id)),
 
-    onSuccess: () => {
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+
+      const previousPosts = queryClient.getQueryData(["posts"]);
+
+      return { previousPosts };
+    },
+
+    onError: (_err, _vars, context) => {
+      queryClient.setQueryData(["posts"], context?.previousPosts);
+    },
+
+    onSettled: () => {
       queryClient.invalidateQueries({
         queryKey: ["posts"],
       });
@@ -58,9 +70,10 @@ export default function PostCard({ post }: any) {
   const handleLike = () => {
     if (likeMutation.isPending) return;
 
-    setLiked((prev) => !prev);
+    const newLiked = !liked;
 
-    setLikes((prev) => (liked ? prev - 1 : prev + 1));
+    setLiked(newLiked);
+    setLikes((prev) => (newLiked ? prev + 1 : prev - 1));
 
     likeMutation.mutate();
   };
@@ -129,13 +142,17 @@ export default function PostCard({ post }: any) {
         </div>
       </div>
       {/* Image */}
-      <div className="aspect-square w-full overflow-hidden rounded-xl">
+      <Button
+        onDoubleClick={handleLike}
+        className="aspect-square w-full overflow-hidden rounded-xl"
+      >
         <img
           src={post.imageUrl}
           className="w-full h-full object-cover cursor-pointer"
           onClick={() => router.push(`/post/${post.id}`)}
+          onDoubleClick={handleLike}
         />
-      </div>
+      </Button>
 
       {/* Actions */}
       <div className="flex justify-between items-center mt-3">

@@ -54,3 +54,13 @@ export const getMyFollowing = async () => {
   const res = await api.get("/api/me/following");
   return res.data;
 };
+
+export const getMe = async () => {
+  const res = await api.get("/api/me", {
+    headers: {
+      Authorization: `Bearer ${localStorage.getItem("token")}`,
+    },
+  });
+
+  return res.data;
+};
