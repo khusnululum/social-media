@@ -23,7 +23,7 @@ export default function FollowersModal({ open, onClose, users }: any) {
           {users.map((user: any) => (
             <div key={user.id} className="flex items-center gap-3">
               <Avatar>
-                <AvatarImage src={user.avatarUrl} />
+                <AvatarImage src={user.avatarUrl} className="object-cover" />
                 <AvatarFallback>{user.name?.charAt(0)}</AvatarFallback>
               </Avatar>
 

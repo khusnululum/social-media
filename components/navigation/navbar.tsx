@@ -84,7 +84,7 @@ export default function Navbar({ user }: any) {
 
   return (
     <div
-      className={`sticky top-0 z-50 px-4 py-3 max-w-360 mx-auto text-white transition-all duration-300
+      className={`sticky top-0 z-50 px-4 py-3 max-w-360 mx-auto bg-black text-white transition-all duration-300
     ${scrolled ? "backdrop-blur-lg bg-black/60" : "bg-black"}`}
     >
       <div className="max-w-6xl mx-auto flex items-center justify-between">
@@ -234,7 +234,7 @@ export default function Navbar({ user }: any) {
                 <Button
                   variant="outline"
                   onClick={() => router.push("/login")}
-                  className="rounded-full border-neutral-800"
+                  className="rounded-full border-neutral-800 bg-transparent"
                 >
                   Login
                 </Button>
@@ -262,7 +262,7 @@ export default function Navbar({ user }: any) {
           <Button
             variant="outline"
             onClick={() => router.push("/login")}
-            className="flex-1 rounded-full border-neutral-800"
+            className="flex-1 rounded-full bg-transparent border-neutral-800"
           >
             Login
           </Button>

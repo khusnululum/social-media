@@ -34,7 +34,6 @@ export default function ProfilePageComponent({
   stats,
   posts,
   isMyProfile = false,
-  savedPosts = [],
 }: ProfilePageProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("gallery");
@@ -126,6 +125,13 @@ export default function ProfilePageComponent({
 
   const galleryPosts = isMyProfile ? posts : (userPostsData?.data?.posts ?? []);
 
+  const postsCache = queryClient.getQueryData(["posts"]) as any;
+  const allPosts =
+    postsCache?.pages?.flatMap((page: any) => page.data.posts) ?? [];
+
+  const savedPosts = allPosts.filter((post: any) => post.isSaved);
+  const likedPosts = allPosts.filter((post: any) => post.likedByMe);
+
   if (!profile) {
     return (
       <div className="max-w-360 mx-auto bg-black">
@@ -142,8 +148,8 @@ export default function ProfilePageComponent({
     <div className="max-w-360 mx-auto bg-black">
       <div className="bg-black text-white min-h-screen py-4 px-4 max-w-150 mx-auto">
         {/* HEADER */}
-        <div className="space-y-4 ">
-          <div className="md:flex md:justify-between md:items-center">
+        <div className="space-y-4">
+          <div className="md:flex md:justify-between md:items-center space-y-4">
             <div className="flex items-center gap-4">
               <Avatar className="w-16 h-16">
                 <AvatarImage src={profile?.avatarUrl} />
@@ -302,12 +308,13 @@ export default function ProfilePageComponent({
                   {isMyProfile ? "No saved posts yet" : "No liked posts yet"}
                 </p>
               ) : (
-                <div className="grid grid-cols-3 gap-0.5">
+                <div className="grid grid-cols-3 gap-1">
                   {savedPosts.map((post: any) => (
                     <img
                       key={post.id}
                       src={post.imageUrl}
-                      className="aspect-square object-cover"
+                      className="aspect-square object-cover cursor-pointer"
+                      onClick={() => router.push(`/post/${post.id}`)}
                     />
                   ))}
                 </div>

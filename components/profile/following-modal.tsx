@@ -44,7 +44,7 @@ export default function FollowingModal({
             users.map((user: any) => (
               <div key={user.id} className="flex items-center gap-3">
                 <Avatar>
-                  <AvatarImage src={user.avatarUrl} />
+                  <AvatarImage src={user.avatarUrl} className="object-cover" />
                   <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
                 </Avatar>
 

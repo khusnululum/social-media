@@ -61,18 +61,7 @@ export default function PostDetailPage({
     setText((prev) => prev + emojiData.emoji);
   };
 
-  const [liked, setLiked] = useState(false);
-  const [likeCount, setLikeCount] = useState(0);
-  const [saved, setSaved] = useState(false);
-
-  useEffect(() => {
-    if (!post) return;
-
-    setLiked(post.likedByMe ?? false);
-    setLikeCount(post.likeCount ?? 0);
-    setSaved(post.isSaved ?? false);
-  }, [post]);
-
+  // Like Mutation
   const likeMutation = useMutation({
     mutationFn: () => (liked ? unlikePost(post.id) : likePost(post.id)),
 
@@ -80,6 +69,29 @@ export default function PostDetailPage({
       await queryClient.cancelQueries({
         queryKey: ["post-detail", id],
       });
+
+      const previousPost = queryClient.getQueryData(["post-detail", id]);
+
+      queryClient.setQueryData(["post-detail", id], (old: any) => {
+        if (!old) return old;
+
+        const p = old.data;
+
+        return {
+          ...old,
+          data: {
+            ...p,
+            likedByMe: !p.likedByMe,
+            likeCount: p.likedByMe ? p.likeCount - 1 : p.likeCount + 1,
+          },
+        };
+      });
+
+      return { previousPost };
+    },
+
+    onError: (_err, _vars, context) => {
+      queryClient.setQueryData(["post-detail", id], context?.previousPost);
     },
 
     onSettled: () => {
@@ -89,24 +101,70 @@ export default function PostDetailPage({
     },
   });
 
+  // Save Mutation
   const saveMutation = useMutation({
-    mutationFn: (isSaved: boolean) =>
-      isSaved ? unsavePost(post.id) : savePost(post.id),
+    mutationFn: () => (saved ? unsavePost(post.id) : savePost(post.id)),
+
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+      await queryClient.cancelQueries({ queryKey: ["post-detail", post.id] });
+
+      const previousPosts = queryClient.getQueryData(["posts"]);
+      const previousDetail = queryClient.getQueryData(["post-detail", post.id]);
+
+      const toggle = (p: any) => ({
+        ...p,
+        likedByMe: !p.likedByMe,
+        likeCount: p.likedByMe ? p.likeCount - 1 : p.likeCount + 1,
+      });
+
+      // update FEED cache
+      queryClient.setQueryData(["posts"], (old: any) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            data: {
+              ...page.data,
+              posts: page.data.posts.map((p: any) =>
+                p.id === post.id ? toggle(p) : p,
+              ),
+            },
+          })),
+        };
+      });
+
+      // update POST DETAIL cache
+      queryClient.setQueryData(["post-detail", post.id], (old: any) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          data: toggle(old.data),
+        };
+      });
+
+      return { previousPosts, previousDetail };
+    },
+
+    onError: (_err, _vars, context) => {
+      queryClient.setQueryData(["posts"], context?.previousPosts);
+      queryClient.setQueryData(
+        ["post-detail", post.id],
+        context?.previousDetail,
+      );
+    },
 
     onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["post-detail", id],
-      });
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post-detail", post.id] });
     },
   });
 
   const handleLike = () => {
     if (likeMutation.isPending) return;
-
-    const newLiked = !liked;
-
-    setLiked(newLiked);
-    setLikeCount((prev) => (newLiked ? prev + 1 : prev - 1));
 
     likeMutation.mutate();
   };
@@ -114,14 +172,17 @@ export default function PostDetailPage({
   const handleSave = () => {
     if (saveMutation.isPending) return;
 
-    const current = saved;
-
-    setSaved(!current);
-
-    saveMutation.mutate(current);
+    saveMutation.mutate();
   };
 
   const queryClient = useQueryClient();
+
+  const cachedPost =
+    (queryClient.getQueryData(["post-detail", id]) as any)?.data || post;
+
+  const liked = cachedPost?.likedByMe ?? false;
+  const likeCount = cachedPost?.likeCount ?? 0;
+  const saved = cachedPost?.isSaved ?? false;
 
   const { data: commentsData, isLoading: commentsLoading } = useQuery({
     queryKey: ["comments", id],
@@ -205,9 +266,9 @@ export default function PostDetailPage({
       .join("")
       .toUpperCase();
   };
-  console.log("ME:", currentUser);
-  console.log("POST AUTHOR:", post?.author?.id);
-  console.log("IS MY POST:", isMyPost);
+  // console.log("ME:", currentUser);
+  // console.log("POST AUTHOR:", post?.author?.id);
+  // console.log("IS MY POST:", isMyPost);
 
   return (
     <div className="bg-black max-w-360 mx-auto md:flex md:items-center md:justify-center">

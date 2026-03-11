@@ -19,11 +19,6 @@ export default function PostCard({ post }: any) {
   const commentCount = post.commentCount ?? 0;
   const likedByMe = post.likedByMe ?? false;
 
-  const [liked, setLiked] = useState<boolean>(likedByMe);
-  const [likes, setLikes] = useState<number>(likeCount);
-
-  const [saved, setSaved] = useState<boolean>(post.isSaved || false);
-
   const [showComments, setShowComments] = useState(false);
   const [showLikes, setShowLikes] = useState(false);
   const router = useRouter();
@@ -45,8 +40,96 @@ export default function PostCard({ post }: any) {
 
     onMutate: async () => {
       await queryClient.cancelQueries({ queryKey: ["posts"] });
+      await queryClient.cancelQueries({ queryKey: ["post-detail", post.id] });
 
       const previousPosts = queryClient.getQueryData(["posts"]);
+      const previousDetail = queryClient.getQueryData(["post-detail", post.id]);
+
+      const toggle = (p: any) => ({
+        ...p,
+        likedByMe: !p.likedByMe,
+        likeCount: p.likedByMe ? p.likeCount - 1 : p.likeCount + 1,
+      });
+
+      // update FEED cache
+      queryClient.setQueryData(["posts"], (old: any) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            data: {
+              ...page.data,
+              posts: page.data.posts.map((p: any) =>
+                p.id === post.id ? toggle(p) : p,
+              ),
+            },
+          })),
+        };
+      });
+
+      // update POST DETAIL cache
+      queryClient.setQueryData(["post-detail", post.id], (old: any) => {
+        if (!old) return old;
+
+        return {
+          ...old,
+          data: toggle(old.data),
+        };
+      });
+
+      return { previousPosts, previousDetail };
+    },
+
+    onError: (_err, _vars, context) => {
+      queryClient.setQueryData(["posts"], context?.previousPosts);
+      queryClient.setQueryData(
+        ["post-detail", post.id],
+        context?.previousDetail,
+      );
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["posts"] });
+      queryClient.invalidateQueries({ queryKey: ["post-detail", post.id] });
+    },
+  });
+
+  const handleLike = () => {
+    if (likeMutation.isPending) return;
+
+    likeMutation.mutate();
+  };
+
+  // Save & Unsave Mutation
+  const saveMutation = useMutation({
+    mutationFn: () => (saved ? unsavePost(post.id) : savePost(post.id)),
+
+    onMutate: async () => {
+      await queryClient.cancelQueries({ queryKey: ["posts"] });
+
+      const previousPosts = queryClient.getQueryData(["posts"]);
+
+      queryClient.setQueryData(["posts"], (old: any) => {
+        return {
+          ...old,
+          pages: old.pages.map((page: any) => ({
+            ...page,
+            data: {
+              ...page.data,
+              posts: page.data.posts.map((p: any) => {
+                if (p.id !== post.id) return p;
+
+                return {
+                  ...p,
+                  isSaved: !p.isSaved,
+                };
+              }),
+            },
+          })),
+        };
+      });
 
       return { previousPosts };
     },
@@ -56,52 +139,26 @@ export default function PostCard({ post }: any) {
     },
 
     onSettled: () => {
-      queryClient.invalidateQueries({
-        queryKey: ["posts"],
-      });
-    },
-  });
-
-  useEffect(() => {
-    setLiked(post.likedByMe || false);
-    setLikes(post.likeCount || 0);
-  }, [post.likedByMe, post.likeCount]);
-
-  const handleLike = () => {
-    if (likeMutation.isPending) return;
-
-    const newLiked = !liked;
-
-    setLiked(newLiked);
-    setLikes((prev) => (newLiked ? prev + 1 : prev - 1));
-
-    likeMutation.mutate();
-  };
-
-  // Save & Unsave Mutation
-  const saveMutation = useMutation({
-    mutationFn: (isSaved: boolean) =>
-      isSaved ? unsavePost(post.id) : savePost(post.id),
-
-    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["posts"] });
-      queryClient.invalidateQueries({ queryKey: ["my-posts"] });
-      queryClient.invalidateQueries({ queryKey: ["saved-posts"] });
     },
   });
 
   const handleSave = () => {
     if (saveMutation.isPending) return;
 
-    const current = saved;
-
-    setSaved(!current); // update UI dulu
-    saveMutation.mutate(current); // kirim state lama
+    saveMutation.mutate();
   };
 
-  useEffect(() => {
-    setSaved(post.isSaved ?? false);
-  }, [post.isSaved]);
+  const cachedPosts: any = queryClient.getQueryData(["posts"]);
+
+  const cachedPost =
+    cachedPosts?.pages
+      ?.flatMap((page: any) => page.data.posts)
+      ?.find((p: any) => p.id === post.id) || post;
+
+  const liked = cachedPost.likedByMe;
+  const likes = cachedPost.likeCount;
+  const saved = cachedPost.isSaved;
 
   const [expanded, setExpanded] = useState(false);
 
@@ -121,7 +178,7 @@ export default function PostCard({ post }: any) {
           <img
             onClick={() => router.push(`/profile/${post.author.username}`)}
             src={post.author.avatarUrl}
-            className="w-10 h-10 rounded-full"
+            className="w-10 h-10 rounded-full hover:underline hover:cursor-pointer object-cover"
           />
         ) : (
           <div className="w-10 h-10 rounded-full border border-neutral-800 flex items-center justify-center font-semibold">
@@ -132,7 +189,7 @@ export default function PostCard({ post }: any) {
         <div>
           <p
             onClick={() => router.push(`/profile/${post.author.username}`)}
-            className="font-semibold"
+            className="font-semibold hover:underline  hover:cursor-pointer"
           >
             {post.author.name}
           </p>
@@ -212,7 +269,7 @@ export default function PostCard({ post }: any) {
       <div>
         <p
           onClick={() => router.push(`/profile/${post.author.username}`)}
-          className="font-semibold mt-2"
+          className="font-semibold mt-2 hover:underline  hover:cursor-pointer"
         >
           {post.author.username}
         </p>
@@ -222,12 +279,12 @@ export default function PostCard({ post }: any) {
           {!expanded && isLong && "..."}
 
           {isLong && (
-            <button
+            <Button
               onClick={() => setExpanded(!expanded)}
               className="ml-2 text-primary-200 font-bold"
             >
               {expanded ? "Show Less" : "Show More"}
-            </button>
+            </Button>
           )}
         </p>
       </div>
