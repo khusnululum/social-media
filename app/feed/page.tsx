@@ -6,8 +6,19 @@ import PostCard from "@/components/post/post-card";
 import BottomNav from "@/components/navigation/bottom-nav";
 import { useEffect } from "react";
 import LoadingScreen from "@/components/ui/loading-screen";
+import { useRouter } from "next/navigation";
 
 export default function FeedPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      router.replace("/login");
+    }
+  }, []);
+
   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
       queryKey: ["posts"],

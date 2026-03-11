@@ -16,9 +16,18 @@ import Gradient from "@/assets/png/gradient.png";
 import Gradient2 from "@/assets/png/gradient2.png";
 import { useState } from "react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useEffect } from "react";
 
 export default function LoginPage() {
   const router = useRouter();
+
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    if (token) {
+      router.replace("/feed");
+    }
+  }, []);
 
   const form = useForm<LoginSchema>({
     resolver: zodResolver(loginSchema),

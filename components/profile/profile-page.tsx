@@ -187,7 +187,7 @@ export default function ProfilePageComponent({
               <Button
                 variant="outline"
                 size="icon"
-                className="bg-black h-10 border-neutral-900 rounded-full"
+                className="bg-black h-10 w-10 border-neutral-900 rounded-full"
               >
                 <Send size={20} className="size-5" />
               </Button>
